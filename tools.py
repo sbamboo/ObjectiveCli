@@ -69,8 +69,9 @@ def getLeftMostOfSpg(spg,_unsafe=False) -> int:
         else:
             if pos[0] < leftMostFound:
                 leftMostFound = pos[0]
+    return leftMostFound
 
-def getRightMostOfSpg(spg,_unsafe=False) -> bool:
+def getRightMostOfSpg(spg,_unsafe=False) -> int:
     '''Get the right-most x value of a splitPixelGroup, returns x-value as int.'''
     if _unsafe != True:
         if (type(spg) != dict and not isinstance(spg, drawlib.dtypes.splitPixelGroup)) or spg == None:
@@ -85,6 +86,7 @@ def getRightMostOfSpg(spg,_unsafe=False) -> bool:
         else:
             if pos[0] > rightMostFound:
                 rightMostFound = pos[0]
+    return rightMostFound
 
 def isOverlapping(positions=list,coord=tuple) -> bool:
     '''Function to check if a coord is in a position list, effectively if the coord is overlapping an object made from the positions list.'''
@@ -365,7 +367,7 @@ class OriginPointConnector():
     def __init__(self,objectOrData,origin="TL"):
         self.allowedOrigins = ["TL","TR","BL","BR","MID"]
         if objectOrData == None:
-            raise InvalidInputType("ObjectiveCli: Invalid input, objectOrData must not be None.")
+            raise InvalidInputType("ObjectiveCli.opc: Invalid input, objectOrData must not be None.")
         if self._isSprite(objectOrData):
             self.type = "sprite"
             if type(objectOrData) != dict:
@@ -376,6 +378,8 @@ class OriginPointConnector():
             if type(objectOrData) != dict:
                 objectOrData = objectOrData.asSplitPixelGroup()
             self.objectOrData = objectOrData
+        else:
+            raise InvalidInputType(f"ObjectiveCli.opc: Invalid input, must be sprite-data (dict) or the drawlib sprite datatype, or splitPixelGroup-data (dict) or the drawlib splitPixelGroup datatype.")
         self._validateOrigin(origin)
         self.origin = {"type":origin,"pos":self._getPosOfOrigin(origin,self.type,self.objectOrData)}
     def _isSprite(self,data) -> bool:
@@ -487,7 +491,7 @@ class OriginPointConnector():
         _width = self._getWidth(safeType,safeObjOrData)
         _height = self._getHeight(safeType,safeObjOrData)
         if _width % 2 == 0 or _height % 2 == 0:
-            raise InvalidInputType(f"ObjectiveCli: Invalid input, object must have odd width and height to use MID origin (w:{_wdith},h:{height}).")
+            raise InvalidInputType(f"ObjectiveCli.opc: Invalid input, object must have odd width and height to use MID origin (w:{_wdith},h:{height}).")
         # sprite
         if safeType == "sprite":
             xPos = safeObjOrData["xPos"]
@@ -514,10 +518,10 @@ class OriginPointConnector():
         elif origin == "BL": return self._getBottomLeft(safeType,safeObjOrData)
         elif origin == "BR": return self._getBottomRight(safeType,safeObjOrData)
         elif origin == "MID": return self._getMid(safeType,safeObjOrData)
-    def updateData(self,objectOrData):
+    def _updateData(self,objectOrData):
         '''Replaces the data with an object/data, aswell as updating the origin point accoringly.'''
         if objectOrData == None:
-            raise InvalidInputType("ObjectiveCli: Invalid input, objectOrData must not be None.")
+            raise InvalidInputType("ObjectiveCli.opc: Invalid input, objectOrData must not be None.")
         # sprite
         if self._isSprite(objectOrData):
             if type(objectOrData) != dict:
@@ -607,8 +611,6 @@ class OriginPointConnector():
                 self.objectOrData = self.objectOrData.asSplitPixelGroup()
             # Apply the diff to the data
             self.objectOrData = applyDiffSpg(self.objectOrData,(diffX,diffY),_unsafe=True)
-
-
-
-
-
+    def getData(self):
+        '''Gets the data of the object.'''
+        return self.objectOrData

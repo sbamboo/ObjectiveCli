@@ -6,7 +6,8 @@ from .tools import getTopLeft,coordinateDifference,addDiffToCoords
 def fillShape(texture=list,backgroundChars=[" "],fillChar=str):
     nTex = []
     for line in texture:
-        sline = list(line)
+        if type(line) != list: sline = list(line)
+        else: sline = line
         si = None
         ei = None
         nline = ""
@@ -20,14 +21,14 @@ def fillShape(texture=list,backgroundChars=[" "],fillChar=str):
         for index in indexes:
             if 0 <= index < len(sline) and sline[index] in backgroundChars:
                 sline[index] = fillChar
-        nline = ''.join(sline)
-        nTex.append(nline)
+        #nline = ''.join(sline)
+        nTex.append(sline)
     return nTex
 
 def stretchShapeX(texture=list, backgroundChars=[" "]):
     doubled_texture = []
     for line in texture:
-        doubled_line = ""
+        doubled_line = []
         for i, char in enumerate(line):
             if char in backgroundChars:
                 # Check left and right characters for edge preservation
@@ -36,35 +37,35 @@ def stretchShapeX(texture=list, backgroundChars=[" "]):
 
                 # Determine the character to use for preserving edges
                 if left_char in backgroundChars:
-                    doubled_line += char + " "
+                    doubled_line.extend([char," "])
                 elif right_char in backgroundChars:
-                    doubled_line += " " + char
+                    doubled_line.extend([" ",char])
                 else:
-                    doubled_line += " " * 2
+                    doubled_line.extend([" "," "])
             else:
                 # Double the non-empty characters
-                doubled_line += char * 2
+                doubled_line.extend([char,char])
         doubled_texture.append(doubled_line)
     return doubled_texture
 
 def stretchShapeXlp(texture=list, backgroundChars=[" "]):
     stretched_texture = []
     for lIndex,line in enumerate(texture):
-        stretched_line = ""
+        stretched_line = []
         for i, char in enumerate(line):
             if char in backgroundChars:
                 left_char = line[i - 1] if i > 0 else ' '
                 right_char = line[i + 1] if i < len(line) - 1 else ' '
 
                 if left_char in backgroundChars or right_char in backgroundChars:
-                    stretched_line += ' ' + char
+                    stretched_line.extend([' ',char])
                 else:
-                    stretched_line += char
+                    stretched_line.append(char)
             else:
                 #Bottom half
                 if lIndex > round(len(texture)/2):
                     if lIndex == len(texture)-1:
-                        stretched_line += char * 2
+                        stretched_line.extend([char,char])
                     else:
                         # left
                         if i < round(len(line)/2):
@@ -82,9 +83,9 @@ def stretchShapeXlp(texture=list, backgroundChars=[" "]):
                                             nbc = line[_i]
                                 if nbc == None: nbc = " "
                                 # append
-                                stretched_line += char + nbc
+                                stretched_line.extend([char,nbc])
                             else:
-                                stretched_line += char * 2
+                                stretched_line.extend([char,char])
                         # right
                         else:
                             rline = line[::-1]
@@ -102,13 +103,13 @@ def stretchShapeXlp(texture=list, backgroundChars=[" "]):
                                             nbc = rline[_i]
                                 if nbc == None: nbc = " "
                                 # append
-                                stretched_line += nbc + char
+                                stretched_line.extend([nbc,char])
                             else:
-                                stretched_line += char * 2
+                                stretched_line.extend([char,char])
                 #Top half
                 else:
                     if lIndex == 0:
-                        stretched_line += char * 2
+                        stretched_line.extend([char,char])
                     else:
                         # left
                         if i < round(len(line)/2):
@@ -126,9 +127,9 @@ def stretchShapeXlp(texture=list, backgroundChars=[" "]):
                                             nbc = line[_i]
                                 if nbc == None: nbc = " "
                                 # append
-                                stretched_line += char + nbc
+                                stretched_line.extend([char,nbc])
                             else:
-                                stretched_line += char * 2
+                                stretched_line.extend([char,char])
                         #right
                         else:
                             rline = line[::-1]
@@ -146,9 +147,9 @@ def stretchShapeXlp(texture=list, backgroundChars=[" "]):
                                             nbc = rline[_i]
                                 if nbc == None: nbc = " "
                                 # append
-                                stretched_line += nbc + char
+                                stretched_line.extend([nbc,char])
                             else:
-                                stretched_line += char * 2
+                                stretched_line.extend([char,char])
         stretched_texture.append(stretched_line)
     return stretched_texture
 
@@ -167,7 +168,7 @@ def stretchShapeYlp(texture, backgroundChars=[" "]):
             topLine = line
             botLine = line
             # handle botLine
-            newBotLine = ""
+            newBotLine = []
             for i,char in enumerate(botLine):
                 # Left
                 if i < round(len(botLine)/2):
@@ -192,13 +193,13 @@ def stretchShapeYlp(texture, backgroundChars=[" "]):
                                             nbc = yStack[_i]
                                 if nbc == None: nbc = " "
                                 # Append
-                                newBotLine += nbc
+                                newBotLine.append(nbc)
                             else:
-                                newBotLine += char
+                                newBotLine.append(char)
                         else:
-                            newBotLine += char
+                            newBotLine.append(char)
                     else:
-                        newBotLine += char
+                        newBotLine.append(char)
                 else:
                     rBotLine = botLine[::-1]
                     # Get border
@@ -222,13 +223,13 @@ def stretchShapeYlp(texture, backgroundChars=[" "]):
                                             nbc = yStack[_i]
                                 if nbc == None: nbc = " "
                                 # Append
-                                newBotLine += nbc
+                                newBotLine.append(nbc)
                             else:
-                                newBotLine += char
+                                newBotLine.append(char)
                         else:
-                            newBotLine += char
+                            newBotLine.append(char)
                     else:
-                        newBotLine += char
+                        newBotLine.append(char)
             # append
             stretched_texture.append(topLine)
             stretched_texture.append(newBotLine)
@@ -237,7 +238,7 @@ def stretchShapeYlp(texture, backgroundChars=[" "]):
             topLine = line
             botLine = line
             # handle topLine
-            newTopLine = ""
+            newTopLine = []
             for i,char in enumerate(topLine):
                 # Left
                 if i < round(len(topLine)/2):
@@ -262,13 +263,13 @@ def stretchShapeYlp(texture, backgroundChars=[" "]):
                                             nbc = yStack[_i]
                                 if nbc == None: nbc = " "
                                 # Append
-                                newTopLine += nbc
+                                newTopLine.append(nbc)
                             else:
-                                newTopLine += char
+                                newTopLine.append(char)
                         else:
-                            newTopLine += char
+                            newTopLine.append(char)
                     else:
-                        newTopLine += char
+                        newTopLine.append(char)
                 else:
                     rTopLine = topLine[::-1]
                     # Get border
@@ -293,13 +294,13 @@ def stretchShapeYlp(texture, backgroundChars=[" "]):
                                             nbc = yStack[_i]
                                 if nbc == None: nbc = " "
                                 # Append
-                                newTopLine += nbc
+                                newTopLine.append(nbc)
                             else:
-                                newTopLine += char
+                                newTopLine.append(char)
                         else:
-                            newTopLine += char
+                            newTopLine.append(char)
                     else:
-                        newTopLine += char
+                        newTopLine.append(char)
             # append
             stretched_texture.append(newTopLine)
             stretched_texture.append(botLine)
