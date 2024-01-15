@@ -1,0 +1,22 @@
+{
+    "format": 1,
+    "fFormat": "JSON",
+    "libInfo": {
+        "name":    "ImageRenderer",
+        "desc":    "Image cli renderer made in python.",
+        "version": "2.2",
+        "vid":     "4",
+        "release": "2024-01-14",
+        "changelog": "Fixed a bug where the image would be monochromed if the image was not in RGB mode, added noSafeConv flag to disable the fix incase it breaks something.",
+        "author":  "Simon Kalmi Claesson",
+        "dependencies": [
+            {
+                "name":    "pillow",
+                "version": "9.5.0",
+                "version_note":"Tested on above version, most likely works with newer.",
+                "author":  "Jeffrey A. Clark (Alex)",
+                "type": "pip-package"
+            }
+        ]
+    }
+}

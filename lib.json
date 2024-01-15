@@ -1,0 +1,22 @@
+{
+    "format": 1,
+    "fFormat": "JSON",
+    "libInfo": {
+        "name":    "ObjectiveCli",
+        "desc":    "Simple Object-Engine.",
+        "version": "2.0",
+        "vid":     "2",
+        "release": "2024-01-14",
+        "changelog": "Rewrote most of the project.",
+        "author":  "Simon Kalmi Claesson",
+        "dependencies": [
+            {
+                "name":    "Drawlib",
+                "version": "2.0",
+                "version_note": "Required to match dependency.",
+                "author":  "Simon Kalmi Claesson",
+                "type": "source-included"
+            }
+        ]
+    }
+}

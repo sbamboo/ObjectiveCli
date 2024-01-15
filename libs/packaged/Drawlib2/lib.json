@@ -1,0 +1,38 @@
+{
+    "format": 1,
+    "fFormat": "JSON",
+    "libInfo": {
+        "name":    "Drawlib",
+        "desc":    "Drawlib is a simple CLI/TUI drawing library (renderer) made in python.",
+        "version": "2.0",
+        "vid":     "1",
+        "release": "2024-01-14",
+        "changelog": "Rewrote most of the project.",
+        "author":  "Simon Kalmi Claesson",
+        "dependencies": [
+            {
+                "name":    "ImageRenderer",
+                "version": "2.2",
+                "version_note": "Required to match dependency.",
+                "author":  "Simon Kalmi Claesson",
+                "type": "source-included"
+            },
+            {
+                "name":    "bs4",
+                "version": "0.0.1",
+                "version_note":"Tested on above version, most likely works with newer.",
+                "author":  "Leonard Richardson",
+                "type": "pip-package",
+                "note": "Only needed for fonts.py partial."
+            },
+            {
+                "name":    "matplotlib",
+                "version": "3.8.0",
+                "version_note":"Tested on above version, most likely works with newer.",
+                "author":  "John D. Hunter, Michael Droettboom",
+                "type": "pip-package",
+                "note": "Only needed for fonts.py partial."
+            }
+        ]
+    }
+}
