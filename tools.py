@@ -8,15 +8,20 @@ except:
     from ObjectiveCli.getDrawlib import getDrawlib
 drawlib = getDrawlib()
 
-def isWithinExcl(value,minv,maxv):
+def isBetweenExcl(value,minv,maxv) -> bool:
+    '''Checks if a value is between a min and max value, excluding the min/max values from the valid check.
+    {value} > {minv} < {maxv}'''
     if value > minv and value < maxv: return True
     else: return False
 
-def isWithinIncl(value,minv,maxv):
+def isBetweenIncl(value,minv,maxv) -> bool:
+    '''Checks if a value is between a min and max value, including the min/max values in the valid check.
+    {value} >= {minv} <= {maxv}'''
     if value >= minv and value <= maxv: return True
     else: return False
 
-def getTopMostOfSpg(spg,_unsafe=False):
+def getTopMostOfSpg(spg,_unsafe=False) -> int:
+    '''Get the top-most y value of a splitPixelGroup, returns y-value as int.'''
     if _unsafe != True:
         if (type(spg) != dict and not isinstance(spg, drawlib.dtypes.splitPixelGroup)) or spg == None:
             raise InvalidInputType("ObjectiveCli: Invalid input, must be splitPixelGroup-data (dict) or the drawlib splitPixelGroup datatype.")
@@ -32,7 +37,8 @@ def getTopMostOfSpg(spg,_unsafe=False):
                 topMostFound = pos[1]
     return topMostFound
 
-def getBottomMostOfSpg(spg,_unsafe=False):
+def getBottomMostOfSpg(spg,_unsafe=False) -> int:
+    '''Get the bottom-most y value of a splitPixelGroup, returns y-value as int.'''
     if _unsafe != True:
         if (type(spg) != dict and not isinstance(spg, drawlib.dtypes.splitPixelGroup)) or spg == None:
             raise InvalidInputType("ObjectiveCli: Invalid input, must be splitPixelGroup-data (dict) or the drawlib splitPixelGroup datatype.")
@@ -48,7 +54,8 @@ def getBottomMostOfSpg(spg,_unsafe=False):
                 bottomMostFound = pos[1]
     return bottomMostFound
 
-def getLeftMostOfSpg(spg,_unsafe=False):
+def getLeftMostOfSpg(spg,_unsafe=False) -> int:
+    '''Get the left-most x value of a splitPixelGroup, returns x-value as int.'''
     if _unsafe != True:
         if (type(spg) != dict and not isinstance(spg, drawlib.dtypes.splitPixelGroup)) or spg == None:
             raise InvalidInputType("ObjectiveCli: Invalid input, must be splitPixelGroup-data (dict) or the drawlib splitPixelGroup datatype.")
@@ -63,7 +70,8 @@ def getLeftMostOfSpg(spg,_unsafe=False):
             if pos[0] < leftMostFound:
                 leftMostFound = pos[0]
 
-def getRightMostOfSpg(spg,_unsafe=False):
+def getRightMostOfSpg(spg,_unsafe=False) -> bool:
+    '''Get the right-most x value of a splitPixelGroup, returns x-value as int.'''
     if _unsafe != True:
         if (type(spg) != dict and not isinstance(spg, drawlib.dtypes.splitPixelGroup)) or spg == None:
             raise InvalidInputType("ObjectiveCli: Invalid input, must be splitPixelGroup-data (dict) or the drawlib splitPixelGroup datatype.")
@@ -78,11 +86,17 @@ def getRightMostOfSpg(spg,_unsafe=False):
             if pos[0] > rightMostFound:
                 rightMostFound = pos[0]
 
-def isOverlapping(positions=list,coord=tuple):
+def isOverlapping(positions=list,coord=tuple) -> bool:
+    '''Function to check if a coord is in a position list, effectively if the coord is overlapping an object made from the positions list.'''
     if coord in positions: return True
     else: return False
 
-def isInbetweenX(positions=list,coord=tuple):
+def isInbetweenX(positions=list,coord=tuple) -> bool:
+    '''
+    Checks if the coord is inbetween to X-points on the same y.\n
+    1. Gets al positions matching coord.y\n
+    2. Checks if coord.x is inbetween two of the matched points.
+    '''
     leftMostXAtY = None
     rightMostXAtY = None
     for pos in positions:
@@ -97,10 +111,15 @@ def isInbetweenX(positions=list,coord=tuple):
             else:
                 if pos[0] > rightMostXAtY:
                     rightMostXAtY = pos[0]
-    if isWithinExcl(coord[0],leftMostXAtY,rightMostXAtY): return True
+    if isBetweenExcl(coord[0],leftMostXAtY,rightMostXAtY): return True
     else: return False
 
-def isInbetweenY(positions=list,coord=tuple):
+def isInbetweenY(positions=list,coord=tuple) -> bool:
+    '''
+    Checks if the coord is inbetween to Y-points on the same x.\n
+    1. Gets al positions matching coord.x\n
+    2. Checks if coord.y is inbetween two of the matched points.
+    '''
     topMostYAtX = None
     bottomMostYAtX = None
     for pos in positions:
@@ -115,10 +134,11 @@ def isInbetweenY(positions=list,coord=tuple):
             else:
                 if pos[1] > bottomMostYAtX:
                     bottomMostYAtX = pos[1]
-    if isWithinExcl(coord[1],topMostYAtX,bottomMostYAtX): return True
+    if isBetweenExcl(coord[1],topMostYAtX,bottomMostYAtX): return True
     else: return False
 
-def addXspg(spg,x=int,_unsafe=False):
+def addXspg(spg,x=int,_unsafe=False) -> dict:
+    '''Add x to every x-value in the splitPixelGroup.'''
     if _unsafe != True:
         if (type(spg) != dict and not isinstance(spg, drawlib.dtypes.splitPixelGroup)) or spg == None:
             raise InvalidInputType("ObjectiveCli: Invalid input, must be splitPixelGroup-data (dict) or the drawlib splitPixelGroup datatype.")
@@ -129,7 +149,8 @@ def addXspg(spg,x=int,_unsafe=False):
         spg["po"][i] = [pos[0]+x,pos[1]]
     return spg
 
-def addYspg(spg,y=int,_unsafe=False):
+def addYspg(spg,y=int,_unsafe=False) -> dict:
+    '''Add y to every y-value in the splitPixelGroup.'''
     if _unsafe != True:
         if (type(spg) != dict and not isinstance(spg, drawlib.dtypes.splitPixelGroup)) or spg == None:
             raise InvalidInputType("ObjectiveCli: Invalid input, must be splitPixelGroup-data (dict) or the drawlib splitPixelGroup datatype.")
@@ -140,7 +161,11 @@ def addYspg(spg,y=int,_unsafe=False):
         spg["po"][i] = [pos[0],pos[1]+y]
     return spg
 
-def applyDiffSpg(spg,diff=(int,int),_unsafe=False):
+def applyDiffSpg(spg,diff=(int,int),_unsafe=False) -> dict:
+    '''Adds x and y to each x-value and y-value in a splitPixelGroup.\n
+    x-value = x-value+x\n
+    y-value = y-value+y\n
+    Takes (x,y)'''
     if _unsafe != True:
         if (type(spg) != dict and not isinstance(spg, drawlib.dtypes.splitPixelGroup)) or spg == None:
             raise InvalidInputType("ObjectiveCli: Invalid input, must be splitPixelGroup-data (dict) or the drawlib splitPixelGroup datatype.")
@@ -151,76 +176,116 @@ def applyDiffSpg(spg,diff=(int,int),_unsafe=False):
     spg = addYspg(spg,diff[1],_unsafe=True)
     return spg
 
-def getPosDiff(value1=int,value2=int):
+def getPosDiff(value1=int,value2=int) -> int:
+    '''Gets the positive difference between two values. |v1-v2|'''
     return abs(value1-value2)
 
-def getDiff(value1=int,value2=int):
+def getDiff(value1=int,value2=int) -> int:
+    '''Gets the difference between two points. (v1-v2)'''
     return value1-value2
 
 class InvalidInputType(Exception):
+    '''Exception for invalid input type.'''
     def __init__(self,message="ObjectiveCli: Invalid input!"):
         self.message = message
         super().__init__(self.message)
 
 class InvalidOrigin(Exception):
+    '''Exception for invalid origin type/value.'''
     def __init__(self,message="ObjectiveCli: Invalid origin!"):
         self.message = message
         super().__init__(self.message)
 
 class rectBoundryBox():
+    '''Class for rectangleBoundryBox taking tlCorner=(x1,y1) and brCorner=(x2,y2)'''
     def __init__(self,tlCorner=tuple,brCorner=tuple):
         self.tlCorner = tlCorner
         self.brCorner = brCorner
-    def _isXinside(self,x=int):
+    def _isSprite(self,data):
+        '''INTERNAL: Checks if data is sprite'''
+        if (type(data) == dict and data.get("tx") != None) or isinstance(data, drawlib.dtypes.sprite):
+            return True
+        else:
+            return False
+    def _isSplitPixelGroup(self,data):
+        '''INTERNAL: Checks if data is a splitPixelGroup'''
+        if (type(data) == dict and data.get("po") != None) or isinstance(data, drawlib.dtypes.splitPixelGroup):
+            return True
+        else:
+            return False
+    def _isXinside(self,x=int) -> bool:
+        '''INTERNAL: Checks if x is within the boundry box by checking corners.'''
         if x < self.tlCorner[0] or x > self.brCorner[0]: return False
         else: return True
-    def _isYinside(self,y=int):
+    def _isYinside(self,y=int) -> bool:
+        '''INTERNAL: Checks if y is within the boundry box by checking corners.'''
         if y < self.tlCorner[1] or y > self.brCorner[1]: return False
         else: return True
-    def isInside(self,coords=tuple):
+    def isInside(self,coord=tuple) -> bool:
         '''Checks if a coord is inside the rectBoundryBox.'''
-        if self._isXinside(coords[0]) and self._isYinside(coords[1]): return True
+        if self._isXinside(coord[0]) and self._isYinside(coord[1]): return True
         else: return False
-    def getWidth(self):
+    def getWidth(self) -> int:
         '''Gets the width of the rectBoundryBox.'''
         return self.brCorner[0] - self.tlCorner[0]
-    def getHeight(self):
+    def getHeight(self) -> int:
         '''Gets the height of the rectBoundryBox.'''
         return self.brCorner[1] - self.tlCorner[1]
-    def isAdjacentTop(self,coords=tuple):
+    def isAdjacentTop(self,coord=tuple) -> bool:
         '''Checks if a coord is adjacent to the top of the rectBoundryBox.'''
-        if coords[1]-1 == self.tlCorner[1]:
-            if isWithinExcl(coords[0],self.tlCorner[0],self.brCorner[0]): return True
+        if coord[1]-1 == self.tlCorner[1]:
+            if isBetweenExcl(coord[0],self.tlCorner[0],self.brCorner[0]): return True
             else: return False
         else: return False
-    def isAdjacentBottom(self,coords=tuple):
+    def isAdjacentBottom(self,coord=tuple) -> bool:
         '''Checks if a coord is adjacent to the bottom of the rectBoundryBox.'''
-        if coords[1]+1 == self.brCorner[1]:
-            if isWithinExcl(coords[0],self.tlCorner[0],self.brCorner[0]): return True
+        if coord[1]+1 == self.brCorner[1]:
+            if isBetweenExcl(coord[0],self.tlCorner[0],self.brCorner[0]): return True
             else: return False
         else: return False
-    def isAdjacentLeft(self,coords=tuple):
+    def isAdjacentLeft(self,coord=tuple) -> bool:
         '''Checks if a coord is adjacent to the left of the rectBoundryBox.'''
-        if coords[0]+1 == self.tlCorner[0]:
-            if isWithinExcl(coords[1],self.tlCorner[1],self.brCorner[1]): return True
+        if coord[0]+1 == self.tlCorner[0]:
+            if isBetweenExcl(coord[1],self.tlCorner[1],self.brCorner[1]): return True
             else: return False
         else: return False
-    def isAdjacentRight(self,coords=tuple):
+    def isAdjacentRight(self,coord=tuple) -> bool:
         '''Checks if a coord is adjacent to the right of the rectBoundryBox.'''
-        if coords[0]-1 == self.brCorner[0]:
-            if isWithinExcl(coords[1],self.tlCorner[1],self.brCorner[1]): return True
+        if coord[0]-1 == self.brCorner[0]:
+            if isBetweenExcl(coord[1],self.tlCorner[1],self.brCorner[1]): return True
             else: return False
         else: return False
-    def isEnclosedWithin(self,tlCorner=tuple,brCorner=tuple):
+    def isEnclosedWithin(self,tlCorner=tuple,brCorner=tuple) -> bool:
         '''Checks if a box built from tlCorder and brCorner is fully enclosed within the rectBoundryBox.'''
         if tlCorner[0] >= self.tlCorner[0] and brCorner[0] <= self.brCorner[0] and tlCorner[1] >= self.tlCorner[1] and brCorner[1] <= self.brCorner[1]: return True
         else: return False
-    def isEncasedWithin(self,tlCorner=tuple,brCorner=tuple):
+    def isEncasedWithin(self,tlCorner=tuple,brCorner=tuple) -> bool:
         '''Checks if the rectBoundryBox is fully enclosed within a box built from tlCorner and brCorner.'''
         if tlCorner[0] <= self.tlCorner[0] and brCorner[0] >= self.brCorner[0] and tlCorner[1] <= self.tlCorner[1] and brCorner[1] >= self.brCorner[1]: return True
         else: return False
+    def updateCornersByObj(self,objectOrData):
+        '''Updates the corners after the inputed object.'''
+        if objectOrData == None:
+            raise InvalidInputType("ObjectiveCli.rectBoundryBox: Invalid Input, can't be None!")
+        # Sprite
+        if self._isSprite(objectOrData):
+            if type(objectOrData) != dict:
+                objectOrData = objectOrData.asSprite()
+            self.tlCorner = (objectOrData["xPos"],objectOrData["yPos"])
+            self.brCorner = (objectOrData["xPos"]+len(objectOrData["tx"][0]),objectOrData["yPos"]+len(objectOrData["tx"]))
+        # splitPixelGroup
+        elif self._isSplitPixelGroup(objectOrData):
+            if type(objectOrData) != dict:
+                objectOrData = objectOrData.asSplitPixelGroup()
+            top = getTopMostOfSpg(objectOrData,_unsafe=True)
+            bottom = getBottomMostOfSpg(objectOrData,_unsafe=True)
+            left = getLeftMostOfSpg(objectOrData,_unsafe=True)
+            right = getRightMostOfSpg(objectOrData,_unsafe=True)
+            self.tlCorner = (left,top)
+            self.brCorner = (right,bottom)
 
 class OverlapBox():
+    '''Class for an overlapBox, similar to boundryBox but less strict, taking a positions list.'''
     def __init__(self,positions=list):
         self.positions = positions
     def isOverlapping(self,coord=tuple):
@@ -240,8 +305,35 @@ class OverlapBox():
         '''Check if coord is overlapping with the OverlapBox, (Checking if the point is overlapping with a "Cross").'''
         if self.isOverlapping(coord) and self.isWithinXY(coord): return True
         else: return False
+    def isAlignedWithTop(self,coord=tuple):
+        '''Checks if a coordinate is aligned with the top of the overlapBox's y.\ncoord.y -1 == topMost.y'''
+        if coord[1]-1 == self.tlCorner[1]: return True
+        else: return False
+    def isAlignedWithBottom(self,coord=tuple):
+        '''Checks if a coordinate is aligned with the bottom of the overlapBox's y.\ncoord.y +1 == bottomMost.y'''
+        if coord[1]+1 == self.brCorner[1]: return True
+        else: return False
+    def isAlignedWithLeft(self,coord=tuple):
+        '''Checks if a coordinate is aligned with the left of the overlapBox's x.\ncoord.x +1 == leftMost.x'''
+        if coord[0]+1 == self.tlCorner[0]: return True
+        else: return False
+    def isAlignedWithRight(self,coord=tuple):
+        '''Checks if a coordinate is aligned with the right of the overlapBox's x.\ncoord.x -1 == rightMost.x'''
+        if coord[0]-1 == self.brCorner[0]: return True
+        else: return False
+    def getBoxWidth(self):
+        '''Gets the max-width of the overlapBox. (rightMost-leftMost)'''
+        left = getLeftMostOfSpg({"po":self.positions},_unsafe=True)
+        right = getRightMostOfSpg({"po":self.positions},_unsafe=True)
+        return right-left
+    def getBoxHeight(self):
+        '''Gets the max-height of the overlapBox. (bottomMost-topMost)'''
+        top = getTopMostOfSpg({"po":self.positions},_unsafe=True)
+        bottom = getBottomMostOfSpg({"po":self.positions},_unsafe=True)
+        return bottom-top
 
 def getBBtexture(xPos,yPos,texture):
+    '''Gets the boundyBox for a texture, creates a rectBoundryBox object from a texture.'''
     if (type(texture) != list and not isinstance(texture, drawlib.dtypes.texture)) or texture == None:
         raise InvalidInputType("ObjectiveCli: Invalid input, must be textureData (list) or the drawlib texture datatype.")
     if xPos == None or type(xPos) != int:
@@ -256,6 +348,7 @@ def getBBtexture(xPos,yPos,texture):
     return rectBoundryBox(tlCorner,brCorner)
 
 def getBBspg(spg):
+    '''Gets the boundyBox for a splitPixelGroup, creates a rectBoundryBox object from a splitPixelGroup.'''
     if (type(spg) != dict and not isinstance(spg, drawlib.dtypes.splitPixelGroup)) or spg == None:
         raise InvalidInputType("ObjectiveCli: Invalid input, must be splitPixelGroup-data (dict) or the drawlib splitPixelGroup datatype.")
     # Given the previous check we can assume spg to either be splitPixelGroupData or splitPixelGroupObj, so if not a dict (data format) then retrive "splitPixelGroup" property, see drawlib.dtypes.splitPixelGroup
@@ -268,6 +361,7 @@ def getBBspg(spg):
     return rectBoundryBox( (left,top) , (right,bottom) )
     
 class OriginPointConnector():
+    '''Class for originPoint calculations.'''
     def __init__(self,objectOrData,origin="TL"):
         self.allowedOrigins = ["TL","TR","BL","BR","MID"]
         if objectOrData == None:
@@ -284,17 +378,20 @@ class OriginPointConnector():
             self.objectOrData = objectOrData
         self._validateOrigin(origin)
         self.origin = {"type":origin,"pos":self._getPosOfOrigin(origin,self.type,self.objectOrData)}
-    def _isSprite(self,data):
+    def _isSprite(self,data) -> bool:
+        '''INTERNAL: Checks if data is a sprite.'''
         if (type(data) == dict and data.get("tx") != None) or isinstance(data, drawlib.dtypes.sprite):
             return True
         else:
             return False
-    def _isSplitPixelGroup(self,data):
+    def _isSplitPixelGroup(self,data) -> bool:
+        '''INTERNAL: Checks if data is a splitPixelGroup.'''
         if (type(data) == dict and data.get("po") != None) or isinstance(data, drawlib.dtypes.splitPixelGroup):
             return True
         else:
             return False
-    def _getWidth(self,safeType=None,safeObjOrData=None):
+    def _getWidth(self,safeType=None,safeObjOrData=None) -> int:
+        '''INTERNAL: Gets the width of the object. (by-box)'''
         # sprite
         if safeType == "sprite":
             tx = safeObjOrData["tx"]
@@ -305,7 +402,8 @@ class OriginPointConnector():
             left = getLeftMostOfSpg(safeObjOrData,_unsafe=True)
             right = getRightMostOfSpg(safeObjOrData,_unsafe=True)
             return right-left
-    def _getHeight(self,safeType=None,safeObjOrData=None):
+    def _getHeight(self,safeType=None,safeObjOrData=None) -> int:
+        '''INTERNAL: Gets the height of the object. (by-box)'''
         # sprite
         if safeType == "sprite":
             tx = safeObjOrData["tx"]
@@ -316,7 +414,8 @@ class OriginPointConnector():
             top = getTopMostOfSpg(safeObjOrData,_unsafe=True)
             bottom = getBottomMostOfSpg(safeObjOrData,_unsafe=True)
             return bottom-top
-    def _getTopLeft(self,safeType=None,safeObjOrData=None):
+    def _getTopLeft(self,safeType=None,safeObjOrData=None) -> tuple:
+        '''INTERNAL: Gets the top-left point of the object. (by-box)'''
         # sprite
         if safeType == "sprite":
             xPos = safeObjOrData["xPos"]
@@ -332,7 +431,8 @@ class OriginPointConnector():
             left = getLeftMostOfSpg(safeObjOrData,_unsafe=True)
             #right = getRightMostOfSpg(safeObjOrData,_unsafe=True)
             return (left, top)
-    def _getTopRight(self,safeType=None,safeObjOrData=None):
+    def _getTopRight(self,safeType=None,safeObjOrData=None) -> tuple:
+        '''INTERNAL: Gets the top-right point of the object. (by-box)'''
         # sprite
         if safeType == "sprite":
             xPos = safeObjOrData["xPos"]
@@ -348,7 +448,8 @@ class OriginPointConnector():
             #left = getLeftMostOfSpg(safeObjOrData,_unsafe=True)
             right = getRightMostOfSpg(safeObjOrData,_unsafe=True)
             return (right, top)
-    def _getBottomLeft(self,safeType=None,safeObjOrData=None):
+    def _getBottomLeft(self,safeType=None,safeObjOrData=None) -> tuple:
+        '''INTERNAL: Gets the bottom-left point of the object. (by-box)'''
         # sprite
         if safeType == "sprite":
             xPos = safeObjOrData["xPos"]
@@ -365,6 +466,7 @@ class OriginPointConnector():
             #right = getRightMostOfSpg(safeObjOrData,_unsafe=True)
             return (left, bottom)
     def _getBottomRight(self,safeType=None,safeObjOrData=None):
+        '''INTERNAL: Gets the bottom-right point of the object. (by-box)'''
         # sprite
         if safeType == "sprite":
             xPos = safeObjOrData["xPos"]
@@ -381,6 +483,7 @@ class OriginPointConnector():
             right = getRightMostOfSpg(safeObjOrData,_unsafe=True)
             return (right, bottom)
     def _getMid(self,safeType=None,safeObjOrData=None):
+        '''INTERNAL: Gets the mid point of the object. (by-box)'''
         _width = self._getWidth(safeType,safeObjOrData)
         _height = self._getHeight(safeType,safeObjOrData)
         if _width % 2 == 0 or _height % 2 == 0:
@@ -401,15 +504,18 @@ class OriginPointConnector():
             #right = getRightMostOfSpg(safeObjOrData,_unsafe=True)
             return (left+(_width//2),top+(_height//2))
     def _validateOrigin(self,origin=None):
+        '''INTERNAL: Checks that an origin is valid. (by-box)'''
         if origin == None or origin not in self.allowedOrigins:
             raise InvalidOrigin(f"ObjectiveCli: Invalid origin, must be one of {self.allowedOrigins} not {origin}.")
-    def _getPosOfOrigin(self,origin,safeType=None,safeObjOrData=None):
+    def _getPosOfOrigin(self,origin,safeType=None,safeObjOrData=None) -> tuple:
+        '''INTERNAL: Gets the position for the current origin type.'''
         if origin == "TL": return self._getTopLeft(safeType,safeObjOrData)
         elif origin == "TR": return self._getTopRight(safeType,safeObjOrData)
         elif origin == "BL": return self._getBottomLeft(safeType,safeObjOrData)
         elif origin == "BR": return self._getBottomRight(safeType,safeObjOrData)
         elif origin == "MID": return self._getMid(safeType,safeObjOrData)
     def updateData(self,objectOrData):
+        '''Replaces the data with an object/data, aswell as updating the origin point accoringly.'''
         if objectOrData == None:
             raise InvalidInputType("ObjectiveCli: Invalid input, objectOrData must not be None.")
         # sprite
@@ -423,6 +529,8 @@ class OriginPointConnector():
             self.type = "sprite"
             # Get new originPos based on our current origin
             newOriginPos = self._getPosOfOrigin(self.origin["type"],self.type,self.objectOrData)
+            # Update the origin position
+            self.origin["pos"] = newOriginPos
             # Calculate the diff between the old and new originPos
             diffX = getDiff(oldOriginPos[0],newOriginPos[0])
             diffY = getDiff(oldOriginPos[1],newOriginPos[1])
@@ -440,15 +548,19 @@ class OriginPointConnector():
             self.type = "splitPixelGroup"
             # Get new originPos based on our current origin
             newOriginPos = self._getPosOfOrigin(self.origin["type"],self.type,self.objectOrData)
+            # Update the origin position
+            self.origin["pos"] = newOriginPos
             # Calculate the diff between the old and new originPos
             diffX = getDiff(oldOriginPos[0],newOriginPos[0])
             diffY = getDiff(oldOriginPos[1],newOriginPos[1])
             # Apply the diff to the data
             self.objectOrData = applyDiffSpg(self.objectOrData,(diffX,diffY),_unsafe=True)
     def changeOriginPoint(self,origin="TL"):
+        '''Changes the origin point type and recalculates the position.'''
         self._validateOrigin(origin)
         self.origin = {"type":origin,"pos":self._getPosOfOrigin(origin,self.type,self.objectOrData)}
     def moveBy(self,x=int,y=int):
+        '''Moves the object by and x and y value, aswell as recalculating the origin-point.'''
         # Save old origin
         oldOriginPos = self.origin["pos"]
         # Get new originPos based on our current origin
@@ -472,6 +584,7 @@ class OriginPointConnector():
             # Apply the diff to the data
             self.objectOrData = applyDiffSpg(self.objectOrData,(diffX,diffY),_unsafe=True)
     def moveTo(self,x=int,y=int):
+        '''Moves the object to and x and y value, aswell as recalculating the origin-point.'''
         # Save old origin
         oldOriginPos = self.origin["pos"]
         # Get new originPos based on our current origin
