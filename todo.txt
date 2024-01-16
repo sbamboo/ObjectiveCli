@@ -1,0 +1,3 @@
+boundry box handler class wrapping both types, this can then be out into renObj to allow for boundry-math
+
+canvas-object and relateved create method but not under it self so you can't officially have infinite canvases
