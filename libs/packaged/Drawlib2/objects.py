@@ -264,7 +264,7 @@ class assetFileObj():
         posX,posY,texture,color,xtra,comment = load_asset(self.filepath,encoding=self.encoding)
         # color
         if self.color == None:
-            self.color = color
+            self.drawData["baseColor"] = color
         # make sprite (NonClass)
         self.sprite = {"xPos":posX,"yPos":posY,"tx":texture}
     def objectify(self):
