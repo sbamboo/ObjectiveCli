@@ -457,12 +457,12 @@ class wcCanvas():
     def resMode(self):
         self.output.resM()
         self.outputMode = self.output.mode
-    def put(self,x=int,y=int,st=str):
-        self.output.put(x,y,st,baseColor=self.baseColor,palette=self.palette)
-    def mPut(self,coords=list,st=str):
-        self.output.mPut(coords,st,baseColor=self.baseColor,palette=self.palette)
-    def lPut(self,lines=list,stX=int,stY=int):
-        self.output.lPut(lines,stX,stY,baseColor=self.baseColor,palette=self.palette)
+    def put(self,x=int,y=int,st=str,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette):
+        self.output.put(x,y,st,baseColor=baseColor,palette=palette)
+    def mPut(self,coords=list,st=str,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette):
+        self.output.mPut(coords,st,baseColor=baseColor,palette=palette)
+    def lPut(self,lines=list,stX=int,stY=int,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette):
+        self.output.lPut(lines,stX,stY,baseColor=baseColor,palette=palette)
     
     def create_renObject(self,classObjOrData,origin="TL",_additionalData=None,bgChar=" ",baseColor=None,palette=None,drawOnCreation=False,creationDrawMode="obj"):
         """
@@ -540,3 +540,9 @@ class wcCanvas():
     def create_boxImage(self,imagePath=str,mode="foreground",char=None,monochrome=False,width=None,height=None,resampling="lanczos",method=None,textureCodec=None,noSafeConv=False,xPos=None,yPos=None,strTxtMethod=False, origin="TL",_additionalData=None,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette,drawOnCreation=False,creationDrawMode=False,bgChar=" "):
         drawlibObj = self.drawlib.imaging.boxImage
         return self.create_drawlibObj(drawlibObj,imagePath=imagePath,mode=mode,char=char,monochrome=monochrome,width=width,height=height,resampling=resampling,method=method,textureCodec=textureCodec,noSafeConv=noSafeConv,xPos=xPos,yPos=yPos,strTxtMethod=strTxtMethod, origin=origin,_additionalData=_additionalData,baseColor=baseColor,palette=palette,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar)
+
+
+wcc = wcCanvas()
+char = drawlib.coloring.TextObj("{f.red}X{r}")
+rect = wcc.create_rectangle2(char,(0,0),(10,10))
+wcc.draw()
