@@ -286,6 +286,32 @@ class Buffer():
                 for x in self.buffer[y]:
                     lines[y] += self.buffer[y][x]
             return lines
+    def getTxLines(self,xRange=None,yRange=None):
+        # raise on non-created
+        if self.isCreated() == False:
+            raise UncreatedBuffer()
+        # Check sections
+        section,xRange,yRange = checkSectionRange(xRange,yRange, list(self.buffer[0].keys()), list(self.buffer.keys()))
+        # get sectioned
+        if section == True:
+            lines = []
+            yKeys = list(self.buffer.keys())
+            for y in yRange:
+                if y in yKeys:
+                    lines.append([])
+                    xKeys = list(self.buffer[y].keys())
+                    for x in xRange:
+                        if x in xKeys:
+                            lines[y].append(self.buffer[y][x])
+            return lines
+        # get un-sectioned
+        else:
+            lines = []
+            for y in self.buffer:
+                lines.append([])
+                for x in self.buffer[y]:
+                    lines[y].append(self.buffer[y][x])
+            return lines
     def copyStr(self,xRange=None,yRange=None):
         lines = self.getStrLines(xRange,yRange)
         return '\n'.join(lines)
@@ -491,6 +517,32 @@ class BufferCachedClear():
                 lines.append("")
                 for x in self.buffer[y]:
                     lines[y] += self.buffer[y][x]
+            return lines
+    def getTxLines(self,xRange=None,yRange=None):
+        # raise on non-created
+        if self.isCreated() == False:
+            raise UncreatedBuffer()
+        # Check sections
+        section,xRange,yRange = checkSectionRange(xRange,yRange, list(self.buffer[0].keys()), list(self.buffer.keys()))
+        # get sectioned
+        if section == True:
+            lines = []
+            yKeys = list(self.buffer.keys())
+            for y in yRange:
+                if y in yKeys:
+                    lines.append([])
+                    xKeys = list(self.buffer[y].keys())
+                    for x in xRange:
+                        if x in xKeys:
+                            lines[y].append(self.buffer[y][x])
+            return lines
+        # get un-sectioned
+        else:
+            lines = []
+            for y in self.buffer:
+                lines.append([])
+                for x in self.buffer[y]:
+                    lines[y].append(self.buffer[y][x])
             return lines
     def copyStr(self,xRange=None,yRange=None):
         lines = self.getStrLines(xRange,yRange)

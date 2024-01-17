@@ -285,50 +285,52 @@ class rectBoundryBox():
             right = getRightMostOfSpg(objectOrData,_unsafe=True)
             self.tlCorner = (left,top)
             self.brCorner = (right,bottom)
+        else:
+            raise InvalidInputType("ObjectiveCli.rectBoundryBox: Invalid Input, must be sprite or splitPixelGroup!")
 
 class OverlapBox():
     '''Class for an overlapBox, similar to boundryBox but less strict, taking a positions list.'''
     def __init__(self,positions=list):
         self.positions = positions
-    def isOverlapping(self,coord=tuple):
+    def isOverlapping(self,coord=tuple) -> bool:
         '''Check is coord is overlapping with the OverlapBox.'''
         return isOverlapping(self.positions,coord)
-    def isInbetweenX(self,coord=tuple):
+    def isInbetweenX(self,coord=tuple) -> bool:
         '''Check if coord is in between two points on X axis, effectly if within on x-axis.'''
         return isInbetweenX(self.positions,coord)
-    def isInbetweenY(self,coord=tuple):
+    def isInbetweenY(self,coord=tuple) -> bool:
         '''Check if coord is in between two points on Y axis, effectly if within on y-axis.'''
         return isInbetweenY(self.positions,coord)
-    def isWithinXY(self,coord=tuple):
+    def isWithinXY(self,coord=tuple) -> bool:
         '''Check if coord is within the OverlapBox, (Checking if the point is within a "Cross").'''
         if self.isInbetweenX(coord) and self.isInbetweenY(coord): return True
         else: return False
-    def isOverlappingWithingXY(self,coord=tuple):
+    def isOverlappingWithingXY(self,coord=tuple) -> bool:
         '''Check if coord is overlapping with the OverlapBox, (Checking if the point is overlapping with a "Cross").'''
         if self.isOverlapping(coord) and self.isWithinXY(coord): return True
         else: return False
-    def isAlignedWithTop(self,coord=tuple):
+    def isAlignedWithTop(self,coord=tuple) -> bool:
         '''Checks if a coordinate is aligned with the top of the overlapBox's y.\ncoord.y -1 == topMost.y'''
         if coord[1]-1 == self.tlCorner[1]: return True
         else: return False
-    def isAlignedWithBottom(self,coord=tuple):
+    def isAlignedWithBottom(self,coord=tuple) -> bool:
         '''Checks if a coordinate is aligned with the bottom of the overlapBox's y.\ncoord.y +1 == bottomMost.y'''
         if coord[1]+1 == self.brCorner[1]: return True
         else: return False
-    def isAlignedWithLeft(self,coord=tuple):
+    def isAlignedWithLeft(self,coord=tuple) -> bool:
         '''Checks if a coordinate is aligned with the left of the overlapBox's x.\ncoord.x +1 == leftMost.x'''
         if coord[0]+1 == self.tlCorner[0]: return True
         else: return False
-    def isAlignedWithRight(self,coord=tuple):
+    def isAlignedWithRight(self,coord=tuple) -> bool:
         '''Checks if a coordinate is aligned with the right of the overlapBox's x.\ncoord.x -1 == rightMost.x'''
         if coord[0]-1 == self.brCorner[0]: return True
         else: return False
-    def getBoxWidth(self):
+    def getBoxWidth(self) -> int:
         '''Gets the max-width of the overlapBox. (rightMost-leftMost)'''
         left = getLeftMostOfSpg({"po":self.positions},_unsafe=True)
         right = getRightMostOfSpg({"po":self.positions},_unsafe=True)
         return right-left
-    def getBoxHeight(self):
+    def getBoxHeight(self) -> int:
         '''Gets the max-height of the overlapBox. (bottomMost-topMost)'''
         top = getTopMostOfSpg({"po":self.positions},_unsafe=True)
         bottom = getBottomMostOfSpg({"po":self.positions},_unsafe=True)

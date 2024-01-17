@@ -31,6 +31,12 @@ class IdOperationError(Exception):
         self.message = message
         super().__init__(self.message)
 
+class boundryBoxWrapper(rectBoundryBox,OverlapBox):
+    '''Wrapper class for boundryBoxes.'''
+    def __init__(self,tlCorner=tuple,brCorner=tuple,positions=list):
+        rectBoundryBox.__init__(self,tlCorner,brCorner)
+        OverlapBox.__init__(self,positions)
+
 class renObject(OriginPointConnector):
     '''Main render-object for ObjectiveCli.'''
     def __init__(self,objectOrData,origin="TL",_additionalData=None,bgChar=" ",baseColor=None,palette=None):
@@ -252,6 +258,41 @@ class renObject(OriginPointConnector):
         elif self._isSplitPixelGroup(local) == True:
             drawlib.dtypes.render_splitPixelGroup(local,output=output,baseColor=self.baseColor,palette=self.palette,supressDraw=True,clamps=clamps,excludeClamped=excludeClamped)
 
+class bBoxRenObj(renObject):
+    def __init__(self,objectOrData,origin="TL",_additionalData=None,bgChar=" ",baseColor=None,palette=None):
+        super().__init__(objectOrData,origin,_additionalData,bgChar,baseColor,palette)
+        _tl,_br,_po = self._getBoxData()
+        self.bb = boundryBoxWrapper(_tl,_br,_po)
+    def _getBoxData(self):
+        spg = self.asSplitPixelGroup()
+        position = spg["po"]
+        topMost = getTopMostOfSpg(spg)
+        leftMost = getLeftMostOfSpg(spg)
+        bottomMost = getBottomMostOfSpg(spg)
+        rightMost = getRightMostOfSpg(spg)
+        tlCorner = (leftMost,topMost)
+        brCorner = (rightMost,bottomMost)
+        return tlCorner,brCorner,position
+    def _updBoxData(self):
+        spg = self.asSplitPixelGroup()
+        self.bb._updateCornersByObj(spg)
+        self.bb.overlap.positions = spg["po"]
+    def updateData(self,objectOrData):
+        super().updateData(objectOrData)
+        self._updBoxData()
+    def stretchShape2X(self,axis="x",lp=True):
+        super().stretchShape2X(axis=axis,lp=lp)
+        self._updBoxData()
+    def fillShape(self,fillChar=str):
+        super().fillShape(fillChar=fillChar)
+        self._updBoxData()
+    def rotateShape(self,degrees,fixTopLeft=False):
+        super().rotateShape(degrees,fixTopLeft=fixTopLeft)
+        self._updBoxData()
+    def fillBoundaryGap(self):
+        super().fillBoundaryGap()
+        self._updBoxData()
+
 default_canvas_outOpts = {
     "buffIChar": None,
     "buffAutoStr": True,
@@ -261,26 +302,11 @@ default_canvas_outOpts = {
     "autoLink": False
 }
 
-class wcCanvas():
-    '''Window Coupled canvas for ObjectiveCli.'''
-    def __init__(self,width=None,height=None,outputMode="Buffer",outputOpts=default_canvas_outOpts,excludeClamped=True,clampBotX=0,clampBotY=0,clearOnDraw=False):
-        self.width = width
-        self.height = height
-        if type(width) == MethodType: self.width = self.width() # if vw then get value
-        if type(height) == MethodType: self.height = self.height() # if vh then get value
-        if self.width == None: self.width = drawlib.lib_conUtils.getConSize()[0]
-        if self.height == None: self.height = drawlib.lib_conUtils.getConSize()[1]
-        self.outputMode = outputMode
-        self.outputOpts = outputOpts
-        self.excludeClamped = excludeClamped
-        self.clampBotX = clampBotX
-        self.clampBotY = clampBotY
-        self.clearOnDraw = clearOnDraw
-        self.drawlib = drawlib
-        self._getOutputObj()
-        self.objects = {}
-        self.drawnObjects = []
-        self._getOutputObj()
+class canvasPresets():
+    '''THIS OBJECT SHOULD NOT BE USED DIRECTLY, AND IS ONLY MEANT TO BE INHERITED FROM BY OTHER OBJECTS.'''
+    def __init__(self):
+        pass
+
     def _getOutputObj(self):
         self.output = self.drawlib.DrawlibOut(mode=self.outputMode,overwWidth=self.width,overwHeight=self.height,**self.outputOpts)
     def _getClamps(self) -> tuple:
@@ -388,17 +414,12 @@ class wcCanvas():
         for oid in self.objects:
             if oid not in self.drawnObjects:
                 self.putObj(oid)
-    def draw(self):
-        for oid in self.objects.keys():
-            if oid not in self.drawnObjects:
-                self.putObj(oid)
-        self.output.draw(nc=self.clearOnDraw,clamps=self._getClamps())
     def sleep(self,seconds):
         sleep(seconds)
-    def fill(self,char=str):
-        self.output.fill(char)
     def getSize(self):
         return (self.width,self.height)
+    def fill(self,char=str):
+        self.output.fill(char)
 
     def asSprite(self,oidOrObj):
         obj:renObject
@@ -450,20 +471,13 @@ class wcCanvas():
         if obj != None:
             return obj.fillBoundaryGap()
 
-    def setMode(self,mode):
-        if mode in self.output.allowedMods:
-            self.output.setM(mode)
-            self.outputMode = mode
-    def resMode(self):
-        self.output.resM()
-        self.outputMode = self.output.mode
     def put(self,x=int,y=int,st=str,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette):
         self.output.put(x,y,st,baseColor=baseColor,palette=palette)
     def mPut(self,coords=list,st=str,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette):
         self.output.mPut(coords,st,baseColor=baseColor,palette=palette)
     def lPut(self,lines=list,stX=int,stY=int,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette):
         self.output.lPut(lines,stX,stY,baseColor=baseColor,palette=palette)
-    
+
     def create_renObject(self,classObjOrData,origin="TL",_additionalData=None,bgChar=" ",baseColor=None,palette=None,drawOnCreation=False,creationDrawMode="obj"):
         """
         Creates a rendering object from given class-object/data.
@@ -474,7 +488,7 @@ class wcCanvas():
             obj: draw the object .drawObj()
             all: draw the whole canvas .putObj(); .draw()
         """
-        renObj = renObject(classObjOrData,origin,_additionalData,bgChar,baseColor,palette)
+        renObj = self.renObjClass(classObjOrData,origin,_additionalData,bgChar,baseColor,palette)
         _id = self.add(renObj)
         if drawOnCreation == True:
             if _id in self.objects.keys():
@@ -541,8 +555,82 @@ class wcCanvas():
         drawlibObj = self.drawlib.imaging.boxImage
         return self.create_drawlibObj(drawlibObj,imagePath=imagePath,mode=mode,char=char,monochrome=monochrome,width=width,height=height,resampling=resampling,method=method,textureCodec=textureCodec,noSafeConv=noSafeConv,xPos=xPos,yPos=yPos,strTxtMethod=strTxtMethod, origin=origin,_additionalData=_additionalData,baseColor=baseColor,palette=palette,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar)
 
+def _canvasRenObj_constructionWrapper(coupledWindowInstance):
+    '''Class that returns a deffiniton for a canvasRenObj, its done like this so it can use the windows choosen renObjClass as base.'''
+    class canvasRenObj(canvasPresets):
+        def __init__(self,width=None,height=None,outputOpts=default_canvas_outOpts,excludeClamped=True,clampBotX=0,clampBotY=0,clearOnDraw=False,renObjClass=bBoxRenObj,origin="TL",_additionalData=None,bgChar=" ",baseColor=None,palette=None):
+            # Init the canvasPresets
+            canvasPresets().__init__(self)
+            # Rest of canvas setup:
+            self.width = width
+            self.height = height
+            if type(width) == MethodType: self.width = self.width() # if vw then get value
+            if type(height) == MethodType: self.height = self.height() # if vh then get value
+            if self.width == None: self.width = drawlib.lib_conUtils.getConSize()[0]
+            if self.height == None: self.height = drawlib.lib_conUtils.getConSize()[1]
+            self.outputMode = "Buffer"
+            self.outputOpts = outputOpts
+            self.excludeClamped = excludeClamped
+            self.clampBotX = clampBotX
+            self.clampBotY = clampBotY
+            self.clearOnDraw = clearOnDraw
+            self.renObjClass = renObjClass
+            self.drawlib = coupledWindowInstance.drawlib
+            self._getOutputObj()
+            # Init the renderingObj
+            coupledWindowInstance.renObjClass.__init__(self,objectOrData=self._getCanvasAsTexture(),origin=origin,_additionalData=_additionalData,bgChar=bgChar,baseColor=baseColor,palette=palette)
+            self.objects = {}
+            self.drawnObjects = []
+        def _getCanvasAsTexture(self):
+            return self.output.linked.buffer.getTxLines()
+        def updateData(self,objectOrData):
+            # ingest as texture
+            # update the buffer size
+            # update the buffer content
+            # rebuild the cache if a cached buffer
+            pass
+        def draw(self):
+            pass
+    # Return deffinition
+    return canvasRenObj
+
+class wcCanvas(canvasPresets):
+    '''Window Coupled canvas for ObjectiveCli.'''
+    def __init__(self,width=None,height=None,outputMode="Buffer",outputOpts=default_canvas_outOpts,excludeClamped=True,clampBotX=0,clampBotY=0,clearOnDraw=False,renObjClass=bBoxRenObj):
+        super().__init__()
+        self.width = width
+        self.height = height
+        if type(width) == MethodType: self.width = self.width() # if vw then get value
+        if type(height) == MethodType: self.height = self.height() # if vh then get value
+        if self.width == None: self.width = drawlib.lib_conUtils.getConSize()[0]
+        if self.height == None: self.height = drawlib.lib_conUtils.getConSize()[1]
+        self.outputMode = outputMode
+        self.outputOpts = outputOpts
+        self.excludeClamped = excludeClamped
+        self.clampBotX = clampBotX
+        self.clampBotY = clampBotY
+        self.clearOnDraw = clearOnDraw
+        self.renObjClass = renObjClass
+        self.drawlib = drawlib
+        self._getOutputObj()
+        self.objects = {}
+        self.drawnObjects = []
+
+        self.class_canvasRenObj = _canvasRenObj_constructionWrapper(self)
+    def draw(self):
+        for oid in self.objects.keys():
+            if oid not in self.drawnObjects:
+                self.putObj(oid)
+        self.output.draw(nc=self.clearOnDraw,clamps=self._getClamps())
+
+    def setMode(self,mode):
+        if mode in self.output.allowedMods:
+            self.output.setM(mode)
+            self.outputMode = mode
+    def resMode(self):
+        self.output.resM()
+        self.outputMode = self.output.mode
 
 wcc = wcCanvas()
-char = drawlib.coloring.TextObj("{f.red}X{r}")
-rect = wcc.create_rectangle2(char,(0,0),(10,10))
+wcc.create_rectangle2("X",(0,0),(10,10))
 wcc.draw()
