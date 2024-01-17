@@ -78,6 +78,7 @@ def checkSectionRange(xRange=None,yRange=None,bufferXKeys=list,bufferYKeys=list)
     section = False
     validRange = True
     if xRange != None:
+        if type(xRange) == range: xRange = [xRange[0],xRange[-1]+1]
         if isinstance(xRange, (list,tuple)) != True or len(xRange) > 2: raise InvalidSectionRangeType()
         errMsg = ""
         try:
@@ -93,6 +94,7 @@ def checkSectionRange(xRange=None,yRange=None,bufferXKeys=list,bufferYKeys=list)
         xRange = range(xRange[0],xRange[1])
         section = True
     if yRange != None:
+        if type(yRange) == range: yRange = [yRange[0],yRange[-1]+1]
         if isinstance(yRange, (list,tuple)) != True or len(yRange) > 2: raise InvalidSectionRangeType()
         try:
             if yRange[0] < int(bufferYKeys[0]) or yRange[1] > int(bufferYKeys[-1]):

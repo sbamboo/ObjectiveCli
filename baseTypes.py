@@ -1,6 +1,8 @@
 from getDrawlib import getDrawlib
 drawlib = getDrawlib()
 
+from types import MethodType
+
 from time import sleep
 
 from tools import *
@@ -14,6 +16,12 @@ class InsufficientIngestData(Exception):
 class InvalidIngestData(Exception):
     '''Exception for invalid ingest data.'''
     def __init__(self,message="ObjectiveCli: Invalid ingest data!"):
+        self.message = message
+        super().__init__(self.message)
+
+class InvalidPresetId(Exception):
+    '''Exception for when the preset requested id is invalid.'''
+    def __init__(self,message="ObjectiveCli: An error occured!"):
         self.message = message
         super().__init__(self.message)
 
@@ -255,11 +263,11 @@ default_canvas_outOpts = {
 
 class wcCanvas():
     '''Window Coupled canvas for ObjectiveCli.'''
-    def __init__(self,width=int,height=int,outputMode="Buffer",outputOpts=default_canvas_outOpts,excludeClamped=True,clampBotX=0,clampBotY=0,clearOnDraw=False):
+    def __init__(self,width=None,height=None,outputMode="Buffer",outputOpts=default_canvas_outOpts,excludeClamped=True,clampBotX=0,clampBotY=0,clearOnDraw=False):
         self.width = width
         self.height = height
-        if isinstance(width,drawlib.core.vw): self.width() # if vw then get value
-        if isinstance(height,drawlib.core.vh): self.height() # if vh then get value
+        if type(width) == MethodType: self.width = self.width() # if vw then get value
+        if type(height) == MethodType: self.height = self.height() # if vh then get value
         if self.width == None: self.width = drawlib.lib_conUtils.getConSize()[0]
         if self.height == None: self.height = drawlib.lib_conUtils.getConSize()[1]
         self.outputMode = outputMode
@@ -272,7 +280,6 @@ class wcCanvas():
         self._getOutputObj()
         self.objects = {}
         self.drawnObjects = []
-        self.objects = None
         self._getOutputObj()
     def _getOutputObj(self):
         self.output = self.drawlib.DrawlibOut(mode=self.outputMode,overwWidth=self.width,overwHeight=self.height,**self.outputOpts)
@@ -330,7 +337,7 @@ class wcCanvas():
         if type(oidOrObj) == object:
             obj = oidOrObj
         else:
-            obj = self.get(oid)
+            obj = self.get(oidOrObj)
         if x == None or y == None:
             raise IdOperationError("ObjectiveCli: Invalid move-by value given, was None!")
         obj.moveBy(x,y)
@@ -339,7 +346,7 @@ class wcCanvas():
         if type(oidOrObj) == object:
             obj = oidOrObj
         else:
-            obj = self.get(oid)
+            obj = self.get(oidOrObj)
         if x == None or y == None or x < 0 or y < 0:
             raise IdOperationError("ObjectiveCli: Invalid move-to value given, was None or bellow 0!")
         obj.moveTo(x,y)
@@ -358,11 +365,11 @@ class wcCanvas():
         obj = None
         if type(oidOrObj) == object:
             oid = self.getId(oidOrObj)
-            if oid in self.drawnObjects:
+            if oid not in self.drawnObjects:
                 obj = oidOrObj
         else:
-            if oid not in self.drawnObjects:
-                obj = self.get(oid)
+            if oidOrObj not in self.drawnObjects:
+                obj = self.get(oidOrObj)
         if obj != None:
             obj.put(self.output,clamps=self._getClamps(),excludeClamped=self.excludeClamped)
     def drawObj(self, oidOrObj=None):
@@ -382,12 +389,12 @@ class wcCanvas():
             if oid not in self.drawnObjects:
                 self.putObj(oid)
     def draw(self):
-        for oid in self.objects:
+        for oid in self.objects.keys():
             if oid not in self.drawnObjects:
                 self.putObj(oid)
         self.output.draw(nc=self.clearOnDraw,clamps=self._getClamps())
     def sleep(self,seconds):
-        time.sleep(seconds)
+        sleep(seconds)
     def fill(self,char=str):
         self.output.fill(char)
     def getSize(self):
@@ -397,49 +404,49 @@ class wcCanvas():
         obj:renObject
         obj = None
         if type(oidOrObj) != object:
-            obj = self.get(oid)
+            obj = self.get(oidOrObj)
         if obj != None:
             return obj.asSprite()
     def asSplitPixelGroup(self,oidOrObj):
         obj:renObject
         obj = None
         if type(oidOrObj) != object:
-            obj = self.get(oid)
+            obj = self.get(oidOrObj)
         if obj != None:
             return obj.asSplitPixelGroup()
     def updateData(self,oidOrObj,objectOrData):
         obj:renObject
         obj = None
         if type(oidOrObj) != object:
-            obj = self.get(oid)
+            obj = self.get(oidOrObj)
         if obj != None:
             return obj.updateData(objectOrData)
     def stretchShape2X(self,oidOrObj,axis="x",lp=True):
         obj:renObject
         obj = None
         if type(oidOrObj) != object:
-            obj = self.get(oid)
+            obj = self.get(oidOrObj)
         if obj != None:
             return obj.stretchShape2X(axis=axis,lp=lp)
     def fillShape(self,oidOrObj,fillChar=str):
         obj:renObject
         obj = None
         if type(oidOrObj) != object:
-            obj = self.get(oid)
+            obj = self.get(oidOrObj)
         if obj != None:
             return obj.fillShape(fillChar=fillChar)
     def rotateShape(self,oidOrObj,degrees,fixTopLeft=False):
         obj:renObject
         obj = None
         if type(oidOrObj) != object:
-            obj = self.get(oid)
+            obj = self.get(oidOrObj)
         if obj != None:
             return obj.rotateShape(degrees,fixTopLeft=fixTopLeft)
     def fillBoundaryGap(self,oidOrObj):
         obj:renObject
         obj = None
         if type(oidOrObj) != object:
-            obj = self.get(oid)
+            obj = self.get(oidOrObj)
         if obj != None:
             return obj.fillBoundaryGap()
 
@@ -527,21 +534,9 @@ class wcCanvas():
         drawlibObj = self.drawlib.objects.assetTexture
         return self.create_drawlibObj(drawlibObj,origin=origin,_additionalData=_additionalData,baseColor=baseColor,palette=palette,filepath=filepath,posov=p1,charFunc=charFunc,autoGenerate=autoGenerate,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar)
 
-    def create_asciiImage(self,imagePath=str,mode="standard",char=None,pc=False,method="lum",invert=False,monochrome=False,width=None,height=None,resampling="lanczos",textureCodec=None,noSafeConv=False,xPos=None,yPos=None,strTxtMethod=False, origin="TL",_additionalData=None,baseColor=baseColor,palette=palette,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar):
+    def create_asciiImage(self,imagePath=str,mode="standard",char=None,pc=False,method="lum",invert=False,monochrome=False,width=None,height=None,resampling="lanczos",textureCodec=None,noSafeConv=False,xPos=None,yPos=None,strTxtMethod=False, origin="TL",_additionalData=None,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette,drawOnCreation=False,creationDrawMode=False,bgChar=" "):
         drawlibObj = self.drawlib.imaging.boxImage
-        return self.create_drawlibObj(drawlibObj,imagePath=imagePath,mode=mode,char=char,pc=pc,method=method,invert=invert,monochrome=monochrome,width=width,height=height,resampling=resampling,textureCodec=textureCodec,noSafeConv=noSasfeConv,xPos=xPos,yPos=yPos,strTxtMethod=strTxtMethod, origin=origin,_additionalData=_additionalData,baseColor=baseColor,palette=palette,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar)
-    def create_boxImage(self,imagePath=str,mode="foreground",char=None,monochrome=False,width=None,height=None,resampling="lanczos",method=None,textureCodec=None,noSafeConv=False,xPos=None,yPos=None,strTxtMethod=False, origin="TL",_additionalData=None,baseColor=baseColor,palette=palette,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar):
+        return self.create_drawlibObj(drawlibObj,imagePath=imagePath,mode=mode,char=char,pc=pc,method=method,invert=invert,monochrome=monochrome,width=width,height=height,resampling=resampling,textureCodec=textureCodec,noSafeConv=noSafeConv,xPos=xPos,yPos=yPos,strTxtMethod=strTxtMethod, origin=origin,_additionalData=_additionalData,baseColor=baseColor,palette=palette,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar)
+    def create_boxImage(self,imagePath=str,mode="foreground",char=None,monochrome=False,width=None,height=None,resampling="lanczos",method=None,textureCodec=None,noSafeConv=False,xPos=None,yPos=None,strTxtMethod=False, origin="TL",_additionalData=None,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette,drawOnCreation=False,creationDrawMode=False,bgChar=" "):
         drawlibObj = self.drawlib.imaging.boxImage
-        return self.create_drawlibObj(drawlibObj,imagePath=imagePath,mode=mode,char=char,monochrome=monochrome,width=width,height=height,resampling=resampling,method=method,textureCodec=textureCodec,noSafeConv=noSasfeConv,xPos=xPos,yPos=yPos,strTxtMethod=strTxtMethod, origin=origin,_additionalData=_additionalData,baseColor=baseColor,palette=palette,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar)
-
-
-
-
-# current implementation uses clear() and with multiple canvases this will cause problem, should it:
-#   a) clear only the canvas
-#   b) clear the whole screen (current)
-#   c) cause a redraw of the canvas
-#   d) should the canvas be implemented into the window like before
-#
-# i guess smartest would be to differ between when the canvas in in window-coupled mode and just as an object,
-# apon object it should "erase" and if window-coupled it should clear()
+        return self.create_drawlibObj(drawlibObj,imagePath=imagePath,mode=mode,char=char,monochrome=monochrome,width=width,height=height,resampling=resampling,method=method,textureCodec=textureCodec,noSafeConv=noSafeConv,xPos=xPos,yPos=yPos,strTxtMethod=strTxtMethod, origin=origin,_additionalData=_additionalData,baseColor=baseColor,palette=palette,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar)

@@ -1,3 +1,5 @@
-boundry box handler class wrapping both types, this can then be out into renObj to allow for boundry-math
-
 canvas-object and relateved create method but not under it self so you can't officially have infinite canvases
+
+add wrapper-class for rectBoundryBox and overlapBox that can provide methods for both, then implement this into the renObject so they can be used
+
+add the sound/keyboard modules from frogSay and add them under the window class
