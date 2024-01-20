@@ -7,6 +7,9 @@ from time import sleep
 
 from tools import *
 
+from extensions.keyboard_manager import Keyboard
+from extensions.soundmap import SoundMap
+
 class InsufficientIngestData(Exception):
     '''Exception for insufficient ingest data.'''
     def __init__(self,message="ObjectiveCli: Insufficient ingest data!"):
@@ -631,6 +634,95 @@ class wcCanvas(canvasPresets):
         self.output.resM()
         self.outputMode = self.output.mode
 
-wcc = wcCanvas()
-wcc.create_rectangle2("X",(0,0),(10,10))
-wcc.draw()
+class host():
+    def __init__(self):
+        pass
+    def IsWindows():
+        return drawlib.lib_conUtils.IsWindows()
+    def IsLinux():
+        return drawlib.lib_conUtils.IsLinux()
+    def IsMacOS():
+        return drawlib.lib_conUtils.IsMacOS()
+    def GetPlatform():
+        return drawlib.lib_conUtils.GetPlatform()
+    def IsOs(platformName=str):
+        return drawlib.lib_conUtils.IsOs(platformName)
+    
+
+class Window():
+    '''Main window object.'''
+    def __init__(self,keyboardMappings=None):
+        self.keyboard = Keyboard(keyboardMappings)
+        self.soundmap = SoundMap()
+        self.host = host()
+        self.canvas = None
+
+    def bind(self,canvas):
+        self.canvas = canvas
+
+    def loadMappings(self,mappings):
+        '''Keyboard: load mappings from a dict.'''
+        self.soundmap.loadMappings(mappings)
+    def getLastPress(self):
+        '''Keyboard: get the last key pressed.'''
+        return self.keyboard.getLastPress()
+    def record(self):
+        '''Keyboard: start recording key presses.'''
+        self.keyboard.record()
+    def endrecord(self):
+        '''Keyboard: end recording key presses and return the recorded keys.'''
+        return self.keyboard.endrecord()
+    def waitForKey(self):
+        '''Keyboard: wait for a key to be pressed and return the key.'''
+        return self.keyboard.waitForKey()
+    
+    def playSound(self, mFile, loop=False):
+        '''SoundMap: play a sound file.'''
+        self.soundmap.playSound(mFile, loop=loop)
+    def stopAll(self):
+        '''SoundMap: stop all sounds.'''
+        self.soundmap.stopAll()
+    def playList(self,plist,loop=True):
+        '''SoundMap: play a list of sounds.'''
+        self.soundmap.playList(plist, loop=loop)
+    def playMultiSound(self, sound, playType="single", loop=False):
+        '''
+        Plays a sound or multiple of them (a list).
+        sound: str or single wavFilePath or list of them.
+        playType: (if str-type sound input, playType will alwasy be single)
+            single: play the first song in the list.
+            single-last: play the last song in the list.
+            list: play one after the other.
+            list-reverse: same as list but reverse-order.
+            random: plays a random song.
+        loop: Should it loop? (Only works with playType: single,single-last,random)
+        '''
+        playType = playType.lower()
+        if type(sound) == str:
+            playType = "single"
+            sound = [sound]
+        if playType == "single":
+            self.playSound(sound[0],loop)
+        if playType == "single-last":
+            self.playSound(sound[-1],loop)
+        if playType == "random":
+            self.playSound(random.choice(sound),loop)
+        if playType == "list":
+            self.playList(sound,loop)
+        if playType == "list-reverse":
+            self.playList(sound[::-1],loop)
+        
+    def setConSize(width=int,height=int):
+        drawlib.lib_conUtils.setConSize()
+    def getConSize():
+        return drawlib.lib_conUtils.getConSize()
+    def setConTitle(title=str):
+        drawlib.lib_conUtils.setConTitle(title)
+
+    def term_pause():
+        drawlib.lib_conUtils.pause()
+
+
+window = Window()
+canvas = wcCanvas()
+window.bind(canvas)
