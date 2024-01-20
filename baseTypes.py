@@ -140,7 +140,8 @@ class renObject(OriginPointConnector):
         return {"dtype":dtype,"data":data}
     def _ingest(self,objectOrData,_return=False):
         '''INTERNAL: Function to ingest data from objects/data.'''
-        if isinstance(objectOrData,object):
+        dataTypes = [str,list,dict]
+        if type(objectOrData) not in dataTypes and isinstance(objectOrData,object):
             ingested = self._ingest_object(objectOrData)
         else:
             ingested = self._ingest_data(objectOrData)
@@ -250,9 +251,9 @@ class renObject(OriginPointConnector):
         '''Attempts drawing the object to given output.'''
         local = self.getData()
         if self._isSprite(local) == True:
-            drawlib.dtypes.render_sprite(local,output=output,baseColor=baseColor,palette=palette,drawNc=drawNc,clamps=clamps,excludeClamped=excludeClamped)
+            drawlib.dtypes.render_sprite(local,output=output,drawNc=drawNc,clamps=clamps,excludeClamped=excludeClamped)
         elif self._isSplitPixelGroup(local) == True:
-            drawlib.dtypes.render_splitPixelGroup(local,output=output,baseColor=baseColor,palette=palette,drawNc=drawNc,clamps=clamps,excludeClamped=excludeClamped)
+            drawlib.dtypes.render_splitPixelGroup(local,output=output,drawNc=drawNc,clamps=clamps,excludeClamped=excludeClamped)
     def put(self,output=object,clamps=None,excludeClamped=True):
         '''Attempts putting the object to given output.'''
         local = self.getData()
@@ -409,8 +410,8 @@ class canvasPresets():
             if oid in self.drawnObjects:
                 obj = oidOrObj
         else:
-            if oid not in self.drawnObjects:
-                obj = self.get(oid)
+            if oidOrObj not in self.drawnObjects:
+                obj = self.get(oidOrObj)
         if obj != None:
             obj.draw(self.output,clamps=self._getClamps(),excludeClamped=self.excludeClamped)
     def putAll(self):
@@ -557,6 +558,36 @@ class canvasPresets():
     def create_boxImage(self,imagePath=str,mode="foreground",char=None,monochrome=False,width=None,height=None,resampling="lanczos",method=None,textureCodec=None,noSafeConv=False,xPos=None,yPos=None,strTxtMethod=False, origin="TL",_additionalData=None,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette,drawOnCreation=False,creationDrawMode=False,bgChar=" "):
         drawlibObj = self.drawlib.imaging.boxImage
         return self.create_drawlibObj(drawlibObj,imagePath=imagePath,mode=mode,char=char,monochrome=monochrome,width=width,height=height,resampling=resampling,method=method,textureCodec=textureCodec,noSafeConv=noSafeConv,xPos=xPos,yPos=yPos,strTxtMethod=strTxtMethod, origin=origin,_additionalData=_additionalData,baseColor=baseColor,palette=palette,drawOnCreation=drawOnCreation,creationDrawMode=creationDrawMode,bgChar=bgChar)
+    
+    def _graphRenObj_constructionWrapper(self,inst_drawlib,inst_renObjClass,inst_output):
+        class graphRenObj(inst_renObjClass):
+            def __init__(self,function,pointChar="X",fillChar="*",pos=(0,0),xRange=(-10,10),yRange=(-10,10),step=1.0,xFactor=1.0,yFactor=1.0,floatRndDecis=2,intRound=True,assumptionFill=False,debug=False,debug_x_scale=1.0,debug_y_scale=1.0,debugGrid=True,origin="TL",_additionalData=None,bgChar=" ",baseColor=None,palette=None):
+                self.plotter = inst_drawlib.graphing.graphPlotter(function,inst_output,pointChar,fillChar)
+                self.plotter.plot(pos,xRange,yRange,step,xFactor,yFactor,floatRndDecis,intRound,assumptionFill,debug,debug_x_scale,debug_y_scale,debugGrid)
+                if _additionalData == None:
+                    _additionalData = {}
+                    _additionalData["xPos"] = pos[0]
+                    _additionalData["yPos"] = pos[1]
+                else:
+                    if _additionalData.get("xPos") == None: _additionalData["xPos"] = pos[0]
+                    if _additionalData.get("yPos") == None: _additionalData["yPos"] = pos[1]
+                super().__init__(objectOrData=self.plotter.getAsTx(),origin=origin,_additionalData=_additionalData,bgChar=bgChar,baseColor=baseColor,palette=palette)
+            def getFunc(self):
+                return self.plotter.data["func"]
+            def getY(self,x):
+                return self.plotter.data["func"](x)
+        return graphRenObj
+    def create_graph(self,function,pointChar="X",fillChar="*",pos=(0,0),xRange=(-10,10),yRange=(-10,10),step=1.0,xFactor=1.0,yFactor=1.0,floatRndDecis=2,intRound=True,assumptionFill=False,debug=False,debug_x_scale=1.0,debug_y_scale=1.0,debugGrid=True,origin="TL",_additionalData=None,bgChar=" ",baseColor=None,palette=None,drawOnCreation=False,creationDrawMode="obj"):
+        obj = self._graphRenObj_constructionWrapper(self.drawlib,self.renObjClass,self.output)
+        renObj = obj(function,pointChar,fillChar,pos,xRange,yRange,step,xFactor,yFactor,floatRndDecis,intRound,assumptionFill,debug,debug_x_scale,debug_y_scale,debugGrid,origin,_additionalData,bgChar,baseColor,palette)
+        _id = self.add(renObj)
+        if drawOnCreation == True:
+            if _id in self.objects.keys():
+                if creationDrawMode == "obj":
+                    self.drawObj(_id)
+                else:
+                    self.draw()
+        return _id
 
 def _canvasRenObj_constructionWrapper(coupledWindowInstance):
     '''Class that returns a deffiniton for a canvasRenObj, its done like this so it can use the windows choosen renObjClass as base.'''
@@ -633,6 +664,8 @@ class wcCanvas(canvasPresets):
     def resMode(self):
         self.output.resM()
         self.outputMode = self.output.mode
+            
+
 
 class host():
     def __init__(self):
@@ -726,3 +759,7 @@ class Window():
 window = Window()
 canvas = wcCanvas()
 window.bind(canvas)
+
+graph = canvas.create_graph("f(x)=x^2",debug=False)
+
+canvas.drawObj(graph)

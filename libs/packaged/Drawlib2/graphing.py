@@ -180,7 +180,7 @@ class graphPlotter():
         for _ in range(height+1):
             line = []
             for _ in range(width+1):
-                line.append("")
+                line.append(" ")
             lines.append(line)
         for pos in self.data["fillPixels"]:
             lines[pos[1]-1][pos[0]-1] = self.fillChar

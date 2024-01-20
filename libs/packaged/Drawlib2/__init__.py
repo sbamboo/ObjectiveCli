@@ -7,6 +7,7 @@ try:
     from . import dtypes
     from . import fonts
     from . import generators
+    from . import graphing
     from . import imaging
     from . import linedraw
     from . import manip
@@ -24,6 +25,7 @@ except:
     from Drawlib2 import dtypes
     from Drawlib2 import fonts
     from Drawlib2 import generators
+    from Drawlib2 import graphing
     from Drawlib2 import imaging
     from Drawlib2 import linedraw
     from Drawlib2 import manip
@@ -63,6 +65,7 @@ class DrawlibRenderer():
         self.dtypes = dtypes
         self.fonts = fonts
         self.generators = generators
+        self.graphing = graphing
         self.imaging = imaging
         self.linedraw = linedraw
         self.manip = manip

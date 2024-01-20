@@ -1,5 +1,5 @@
 import platform
-from cslib import autopipImport
+from ObjectiveCli.libs.packaged.Drawlib2.libs.crshpiptools import autopipImport
 
 # SoundMap class based on platform
 platformv = platform.system()

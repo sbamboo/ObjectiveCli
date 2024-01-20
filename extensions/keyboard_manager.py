@@ -1,6 +1,10 @@
 import threading
 
-from cslib import autopipImport
+import os,sys
+parent = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.abspath(os.path.join(parent,"..","..")))
+
+from ObjectiveCli.libs.packaged.Drawlib2.libs.crshpiptools import autopipImport
 
 readchar = autopipImport("readchar")
 
