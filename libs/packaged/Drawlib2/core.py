@@ -73,7 +73,12 @@ del placeholders
 # endregion
 
 # region Helpers
-def checkSectionRange(xRange=None,yRange=None,bufferXKeys=list,bufferYKeys=list) -> bool:
+def rangeFixWrapper(xRange,yRange,minFixV=0,maxFixV=2):
+    xRange = range(xRange[0]+minFixV,xRange[-1]+maxFixV)
+    yRange = range(yRange[0]+minFixV,yRange[-1]+maxFixV)
+    return xRange,yRange
+
+def checkSectionRange(xRange=None,yRange=None,bufferXKeys=list,bufferYKeys=list,minFixV=0,maxFixV=2) -> bool:
     t = "Drawlib.Buffer: Attempted use of section-range outside the buffer size."
     section = False
     validRange = True
@@ -109,6 +114,7 @@ def checkSectionRange(xRange=None,yRange=None,bufferXKeys=list,bufferYKeys=list)
         yRange = range(yRange[0],yRange[1])
         section = True
     if validRange == False: raise SectionRangeOutOfBounds(errMsg)
+    xRange,yRange = rangeFixWrapper(xRange,yRange,minFixV,maxFixV)
     return section,xRange,yRange
 
 def picklePrioCopy(_dict):
@@ -121,6 +127,10 @@ def picklePrioCopy(_dict):
         for sub in _dict:
             nd[sub] = _dict[sub].copy()
         return nd
+
+def drawWrapper(x,y,v,baseColor):
+    '''INTERNAL: Exists to wrap draw calls incase of changed being needed.'''
+    draw(x,y,v,baseColor)
 # endregion
 
 # region Buffer & Output classes
@@ -200,14 +210,14 @@ class Buffer():
                         if x in xKeys:
                             v = self.buffer[y].get(x)
                             if v == "" or v == None: v = self.fallbackChar
-                            draw(x,y,v,baseColor)
+                            drawWrapper(x,y,v,baseColor)
         # draw un-sectioned
         else:
             for y in self.buffer:
                 for x in self.buffer[y]:
                     v = self.buffer[y].get(x)
                     if v == "" or v == None: v = self.fallbackChar
-                    draw(x,y,v,baseColor)
+                    drawWrapper(x,y,v,baseColor)
     def putDelim(self,x,y,st,delim=";"):
         self.anyOutOfBounds([x],[y])
         # raise on non-created
@@ -431,14 +441,14 @@ class BufferCachedClear():
                         if x in xKeys:
                             v = self.buffer[y].get(x)
                             if v == "" or v == None: v = self.fallbackChar
-                            draw(x,y,v,baseColor)
+                            drawWrapper(x,y,v,baseColor)
         # draw un-sectioned
         else:
             for y in self.buffer:
                 for x in self.buffer[y]:
                     v = self.buffer[y].get(x)
                     if v == "" or v == None: v = self.fallbackChar
-                    draw(x,y,v,baseColor)
+                    drawWrapper(x,y,v,baseColor)
     def putDelim(self,x,y,st,delim=";"):
         self.anyOutOfBounds([x],[y])
         # raise on non-created

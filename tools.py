@@ -1,11 +1,5 @@
 # Try the normal import way
-try:
-    from getDrawlib import getDrawlib
-# If it fails do the more complicated way
-except:
-    import os,sys
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),"..","..")))
-    from ObjectiveCli.getDrawlib import getDrawlib
+from .getDrawlib import getDrawlib
 drawlib = getDrawlib()
 
 def isBetweenExcl(value,minv,maxv) -> bool:

@@ -1,14 +1,14 @@
-from getDrawlib import getDrawlib
+from .getDrawlib import getDrawlib
 drawlib = getDrawlib()
 
 from types import MethodType
 
 from time import sleep
 
-from tools import *
+from .tools import *
 
-from extensions.keyboard_manager import Keyboard
-from extensions.soundmap import SoundMap
+from .extensions.keyboard_manager import Keyboard
+from .extensions.soundmap import SoundMap
 
 class InsufficientIngestData(Exception):
     '''Exception for insufficient ingest data.'''
@@ -31,6 +31,12 @@ class InvalidPresetId(Exception):
 class IdOperationError(Exception):
     '''Exception for errors occuring during an id-based operation.'''
     def __init__(self,message="ObjectiveCli: An error occured!"):
+        self.message = message
+        super().__init__(self.message)
+
+class unboundCanvas(Exception):
+    '''Exception for operations on an unbound window-coupled canvass.'''
+    def __init__(self,message="ObjectiveCli: Attempted operation on unbound window-coupled canvas!"):
         self.message = message
         super().__init__(self.message)
 
@@ -589,6 +595,31 @@ class canvasPresets():
                     self.draw()
         return _id
 
+    def create_text(self,text,p1=tuple,customTags={},origin="TL",_additionalData=None,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette,charFunc=drawlib.generators.baseGenerator,autoGenerate=False,drawOnCreation=False,creationDrawMode="obj",bgChar=" "):
+        text = self.drawlib.coloring.TextObj(text,customTags)
+        sprite = {"xPos":p1[0],"yPos":p1[1],"tx":[text]}
+        renObj = self.renObjClass(sprite,origin,_additionalData,bgChar,baseColor,palette)
+        _id = self.add(renObj)
+        if drawOnCreation == True:
+            if _id in self.objects.keys():
+                if creationDrawMode == "obj":
+                    self.drawObj(_id)
+                else:
+                    self.draw()
+        return _id
+    def create_pixeltext(self,unformattedText=str,p1=tuple,formattingPrefix="",formattingSuffix="",customTags={},origin="TL",_additionalData=None,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette,charFunc=drawlib.generators.baseGenerator,autoGenerate=False,drawOnCreation=False,creationDrawMode="obj",bgChar=" "):
+        textPixels = [ drawlib.coloring.TextObj(formattingPrefix+text+formattingSuffix).retFormat() for text in list(unformattedText) ]
+        sprite = {"xPos":p1[0],"yPos":p1[1],"tx":[textPixels]}
+        renObj = self.renObjClass(sprite,origin,_additionalData,bgChar,baseColor,palette)
+        _id = self.add(renObj)
+        if drawOnCreation == True:
+            if _id in self.objects.keys():
+                if creationDrawMode == "obj":
+                    self.drawObj(_id)
+                else:
+                    self.draw()
+        return _id
+
 def _canvasRenObj_constructionWrapper(coupledWindowInstance):
     '''Class that returns a deffiniton for a canvasRenObj, its done like this so it can use the windows choosen renObjClass as base.'''
     class canvasRenObj(canvasPresets):
@@ -649,9 +680,17 @@ class wcCanvas(canvasPresets):
         self._getOutputObj()
         self.objects = {}
         self.drawnObjects = []
+        self.bindedWindow = None
 
         self.class_canvasRenObj = _canvasRenObj_constructionWrapper(self)
+
+    def _checkBind(self):
+        if self.bindedWindow == None:
+            raise unboundCanvas()
+    def _bind(self,window):
+        self.bindedWindow = window
     def draw(self):
+        self._checkBind()
         for oid in self.objects.keys():
             if oid not in self.drawnObjects:
                 self.putObj(oid)
@@ -665,8 +704,6 @@ class wcCanvas(canvasPresets):
         self.output.resM()
         self.outputMode = self.output.mode
             
-
-
 class host():
     def __init__(self):
         pass
@@ -692,6 +729,11 @@ class Window():
 
     def bind(self,canvas):
         self.canvas = canvas
+        self.canvas._bind(self)
+    
+    def draw(self):
+        if self.canvas != None:
+            self.canvas.draw()
 
     def loadMappings(self,mappings):
         '''Keyboard: load mappings from a dict.'''

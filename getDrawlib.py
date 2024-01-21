@@ -22,7 +22,7 @@ mainConfig = json.loads(open(configFile,'r').read())
 
 # [Load drawlib]
 if mainConfig["drawlib"] == "PACKAGED":
-    from libs.packaged import Drawlib2 as drawlib
+    from .libs.packaged import Drawlib2 as drawlib
 else:
     try:
         drawlib = fromPath(mainConfig["drawlib"])
