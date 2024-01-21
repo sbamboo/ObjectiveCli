@@ -745,21 +745,12 @@ class Window():
         if playType == "list-reverse":
             self.playList(sound[::-1],loop)
         
-    def setConSize(width=int,height=int):
+    def setConSize(self,width=int,height=int):
         drawlib.lib_conUtils.setConSize()
-    def getConSize():
+    def getConSize(self):
         return drawlib.lib_conUtils.getConSize()
-    def setConTitle(title=str):
+    def setConTitle(self,title=str):
         drawlib.lib_conUtils.setConTitle(title)
 
-    def term_pause():
+    def term_pause(self):
         drawlib.lib_conUtils.pause()
-
-
-window = Window()
-canvas = wcCanvas()
-window.bind(canvas)
-
-graph = canvas.create_graph("f(x)=x^2",debug=False)
-
-canvas.drawObj(graph)
