@@ -718,7 +718,6 @@ class host():
     def IsOs(platformName=str):
         return drawlib.lib_conUtils.IsOs(platformName)
     
-
 class Window():
     '''Main window object.'''
     def __init__(self,keyboardMappings=None):
