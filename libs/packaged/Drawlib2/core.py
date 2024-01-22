@@ -114,7 +114,8 @@ def checkSectionRange(xRange=None,yRange=None,bufferXKeys=list,bufferYKeys=list,
         yRange = range(yRange[0],yRange[1])
         section = True
     if validRange == False: raise SectionRangeOutOfBounds(errMsg)
-    xRange,yRange = rangeFixWrapper(xRange,yRange,minFixV,maxFixV)
+    if xRange != None and yRange != None:
+        xRange,yRange = rangeFixWrapper(xRange,yRange,minFixV,maxFixV)
     return section,xRange,yRange
 
 def picklePrioCopy(_dict):

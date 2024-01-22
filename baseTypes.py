@@ -407,6 +407,7 @@ class canvasPresets():
             if oidOrObj not in self.drawnObjects:
                 obj = self.get(oidOrObj)
         if obj != None:
+            self.resetHead()
             obj.put(self.output,clamps=self._getClamps(),excludeClamped=self.excludeClamped)
     def drawObj(self, oidOrObj=None):
         obj:renObject
