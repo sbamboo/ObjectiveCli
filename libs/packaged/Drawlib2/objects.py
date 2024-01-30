@@ -10,6 +10,8 @@ class drawlibObj():
         if type(charset) == str:
             if ";;" in charset:
                 self.charset = charset.split(";;")
+            elif "\x1b" in charset:
+                self.charset = [charset]
             else:
                 self.charset = list(charset)
         elif type(charset) == list:

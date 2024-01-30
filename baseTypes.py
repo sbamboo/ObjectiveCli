@@ -66,15 +66,15 @@ class renObject(OriginPointConnector):
         # Asset: dict = {"posX":int,"posY":int,"texture":list,"color":str,"extra":str,"comment":str}
         if type(data) == tuple:
             cmpx = drawlib.dtypes.pixelGroup_to_cmpxPixelGroup(data[0],data[1]) #pixelGroup
-            data = drawlib.dtypes.cmpxPixelGroup_to_SplitPixelGroup(cmpx)
+            data = drawlib.dtypes.cmpxPixelGroup_to_splitPixelGroup(cmpx)
             dtype = "splitPixelGroup"
         elif type(data) == list:
             if type(data[0]) == dict:
-                data = drawlib.dtypes.cmpxPixelGroup_to_SplitPixelGroup(cmpx) # cmpxPixelGroup
+                data = drawlib.dtypes.cmpxPixelGroup_to_splitPixelGroup(data) # cmpxPixelGroup
                 dtype = "splitPixelGroup"
             elif type(data[0]) == str:
                 cmpx = drawlib.dtypes.pixelGroup_to_cmpxPixelGroup(data[0],data[1]) #pixelGroup
-                data = drawlib.dtypes.cmpxPixelGroup_to_SplitPixelGroup(cmpx)
+                data = drawlib.dtypes.cmpxPixelGroup_to_splitPixelGroup(cmpx)
                 dtype = "splitPixelGroup"
             else:
                 if self._additionalData == None:
@@ -285,8 +285,8 @@ class bBoxRenObj(renObject):
         return tlCorner,brCorner,position
     def _updBoxData(self):
         spg = self.asSplitPixelGroup()
-        self.bb._updateCornersByObj(spg)
-        self.bb.overlap.positions = spg["po"]
+        self.bb.updateCornersByObj(spg)
+        self.bb.positions = spg["po"]
     def updateData(self,objectOrData):
         super().updateData(objectOrData)
         self._updBoxData()
@@ -620,6 +620,21 @@ class canvasPresets():
                 else:
                     self.draw()
         return _id
+    def create_pixeltext_spg(self,unformattedText=str,p1=tuple,formattingPrefix="",formattingSuffix="",customTags={},origin="TL",_additionalData=None,baseColor=None,palette=drawlib.coloring.DrawlibStdPalette,charFunc=drawlib.generators.baseGenerator,autoGenerate=False,drawOnCreation=False,creationDrawMode="obj",bgChar=" "):
+        textPixels = [ drawlib.coloring.TextObj(formattingPrefix+text+formattingSuffix).retFormat() for text in list(unformattedText) ]
+        sprite = {"xPos":p1[0],"yPos":p1[1],"tx":[textPixels]}
+        cmpx = self.drawlib.dtypes.sprite_to_cmpxPixelGroup(sprite,bgChar)
+        renObj = self.renObjClass(cmpx,origin,_additionalData,bgChar,baseColor,palette)
+        _id = self.add(renObj)
+        if drawOnCreation == True:
+            if _id in self.objects.keys():
+                if creationDrawMode == "obj":
+                    self.drawObj(_id)
+                else:
+                    self.draw()
+        return _id
+    
+
 
 def _canvasRenObj_constructionWrapper(coupledWindowInstance):
     '''Class that returns a deffiniton for a canvasRenObj, its done like this so it can use the windows choosen renObjClass as base.'''

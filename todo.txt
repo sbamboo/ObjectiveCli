@@ -1,3 +1,4 @@
 canvas-object and related create method but not under it self so you can't officially have infinite canvases
 
 add inputAtPos
+

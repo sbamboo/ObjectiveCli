@@ -4,6 +4,8 @@ from .dtypes import normalizeTextureSplit
 from .tools import getTopLeft,coordinateDifference,addDiffToCoords
 
 def fillShape(texture=list,backgroundChars=[" "],fillChar=str):
+    if fillChar == str:
+        raise ValueError("FillChar must be str, not object,none or other!")
     nTex = []
     for line in texture:
         if type(line) != list: sline = list(line)
